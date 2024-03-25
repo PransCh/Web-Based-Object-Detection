@@ -31,6 +31,7 @@ Then run the below command to start the model
 ### `python app.py`
 
 
+You can see the demo of my project below
 
 https://github.com/PransCh/Web-Based-Object-Detection/assets/105589987/fa5d116c-d983-4f4e-99ad-a63ab9fa1861
 
