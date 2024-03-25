@@ -35,7 +35,14 @@ const ImageInputPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundImage: "url('.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl mb-4">Upload Image</h2>
         <input
@@ -92,16 +99,18 @@ const ImageInputPage = () => {
             </motion.div>
           </div>
         )}
-        <button
-          onClick={() => {
-            setImageURL('');
-            setOutputImageURL('');
-            setFile(null);
-          }}
-          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-        >
-          Clear
-        </button>
+        {imageURL && (
+          <button
+            onClick={() => {
+              setImageURL('');
+              setOutputImageURL('');
+              setFile(null);
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Clear
+          </button>
+        )}
       </div>
     </div>
   );

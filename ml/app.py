@@ -48,7 +48,7 @@ def process_image_route():
                 scores = detection[5:]
                 class_id = np.argmax(scores)
                 confidence = scores[class_id]
-                if confidence > 0.5:
+                if confidence > 0.4:
                     # Extract the bounding box coordinates
                     x = int(detection[0] * width)
                     y = int(detection[1] * height)
