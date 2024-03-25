@@ -3,10 +3,9 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import ImageInputPage from './pages/ImageInputPage'
+import Home from './pages/Home'
 
-  
 const App = () => {
-
   const Layout = () => {
     return (
       <div>
@@ -16,20 +15,21 @@ const App = () => {
       </div>
     )
   }
+
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Layout />,  
+      element: <Layout />,
       children: [
-        {
-        path: "/",
-        element: <ImageInputPage />
-      },
-    ]
-    }])
+        { path: '/', element: <ImageInputPage /> },
+        { path: 'home', element: <Home /> },
+      ],
+    },
+  ])
+
   return (
     <div>
-      <RouterProvider router={router}/>
+      <RouterProvider router={router} />
     </div>
   )
 }
