@@ -4,19 +4,16 @@ import cv2
 import numpy as np
 from io import BytesIO
 import traceback
+import torch
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 cors = CORS(app, resources={
             r"/process_image": {"origins": "http://localhost:3000"}})
 
-# Load the pre-trained YOLO model and class names
-net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
-classes = []
-with open("coco.names", "r") as f:
-    classes = [line.strip() for line in f.readlines()]
-layer_names = net.getLayerNames()
-output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+# Load the pre-trained YOLOv5 model and class names
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+classes = model.names
 
 
 @app.route('/process_image', methods=['POST'])
@@ -27,53 +24,29 @@ def process_image_route():
         # Convert the image to a format readable by OpenCV
         file_bytes = np.frombuffer(image_file.read(), np.uint8)
         img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-        height, width, channels = img.shape
 
-        # Process the image using your existing code
-        # (Skipping the parts related to input/output file paths)
+        # Perform object detection using YOLOv5
+        results = model(img)
 
-        # Initialize lists for detected objects and bounding boxes
-        detected_objects = []
-        bounding_boxes = []
-        confidences = []
-        class_ids = []
+        # Extract bounding boxes and class names from results
+        detected_objects = classes
+        bounding_boxes = results.xyxy[0].cpu().numpy().tolist()
 
-        # Loop through the outputs and extract the bounding boxes, confidences, and class IDs
-        blob = cv2.dnn.blobFromImage(
-            img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-        net.setInput(blob)
-        outputs = net.forward(output_layers)
-        for output in outputs:
-            for detection in output:
-                scores = detection[5:]
-                class_id = np.argmax(scores)
-                confidence = scores[class_id]
-                if confidence > 0.4:
-                    # Extract the bounding box coordinates
-                    x = int(detection[0] * width)
-                    y = int(detection[1] * height)
-                    w = int(detection[2] * width)
-                    h = int(detection[3] * height)
-                    bounding_boxes.append([x, y, w, h])
-                    confidences.append(float(confidence))
-                    class_ids.append(class_id)
+        # Draw bounding boxes on the image
+        for box in bounding_boxes:
+            x1, y1, x2, y2, conf, class_id = box
+            cv2.rectangle(img, (int(x1), int(y1)),
+                          (int(x2), int(y2)), (0, 255, 0), 2)
+            cv2.putText(img, detected_objects[int(class_id)], (int(x1), int(
+                y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        # Apply non-maximum suppression
-        indices = cv2.dnn.NMSBoxes(bounding_boxes, confidences, 0.5, 0.4)
+        # Print the number of detected objects
+        num_objects = len(bounding_boxes)
+        print(f"Number of detected objects: {num_objects}")
 
-        # Draw the remaining bounding boxes on the image
-        for i in indices:
-            box = bounding_boxes[i]
-            x, y, w, h = box
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            detected_objects.append(classes[class_ids[i]])
-
-        # Print the number of bounding boxes
-        num_bounding_boxes = len(indices)
-        print(f"Number of bounding boxes: {num_bounding_boxes}")
-
-        # Encode the processed image as JPEG
-        _, encoded_img = cv2.imencode('.jpg', img)
+        # Encode the processed image as JPEG with higher quality
+        _, encoded_img = cv2.imencode(
+            '.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
         # Create a BytesIO object and write the encoded image data
         output_image_bytes = BytesIO()
@@ -83,7 +56,9 @@ def process_image_route():
         # Create a response object with the processed image and headers
         response = make_response(
             send_file(output_image_bytes, mimetype='image/jpeg'))
-        response.headers['X-Num-BoundingBoxes'] = str(num_bounding_boxes)
+
+        # Add the number of detected objects to response headers
+        response.headers['X-Num-Detected-Objects'] = str(num_objects)
 
         # Return the processed image file
         return response

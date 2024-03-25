@@ -6,6 +6,7 @@ const ImageInputPage = () => {
   const [outputImageURL, setOutputImageURL] = useState('');
   const [file, setFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [numDetectedObjects, setNumDetectedObjects] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -27,6 +28,12 @@ const ImageInputPage = () => {
       const blob = await response.blob();
       const outputImageURL = URL.createObjectURL(blob);
       setOutputImageURL(outputImageURL);
+
+      // Access response headers to get the number of detected objects
+      const numObjectsHeader = response.headers.get('X-Num-Detected-Objects');
+      if (numObjectsHeader) {
+        setNumDetectedObjects(parseInt(numObjectsHeader));
+      }
     } catch (error) {
       console.error('Error processing image:', error);
     } finally {
@@ -91,6 +98,7 @@ const ImageInputPage = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
+              <p>Number of detected objects: {numDetectedObjects}</p>
               <img
                 src={outputImageURL}
                 alt="Output"
@@ -105,6 +113,7 @@ const ImageInputPage = () => {
               setImageURL('');
               setOutputImageURL('');
               setFile(null);
+              setNumDetectedObjects(null);
             }}
             className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
           >
