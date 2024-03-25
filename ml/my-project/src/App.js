@@ -1,7 +1,6 @@
 import React from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import Home from './pages/Home'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import ImageInputPage from './pages/ImageInputPage'
 
@@ -24,12 +23,8 @@ const App = () => {
       children: [
         {
         path: "/",
-        element: <Home /> 
-      },
-      {
-        path:"/ImageInputPage",
         element: <ImageInputPage />
-      }
+      },
     ]
     }])
   return (
