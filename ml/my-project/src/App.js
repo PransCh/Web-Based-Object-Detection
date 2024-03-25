@@ -4,6 +4,7 @@ import Footer from './components/Footer'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import ImageInputPage from './pages/ImageInputPage'
 import Home from './pages/Home'
+import Contact from './pages/Contact'
 
 const App = () => {
   const Layout = () => {
@@ -23,6 +24,7 @@ const App = () => {
       children: [
         { path: '/', element: <ImageInputPage /> },
         { path: 'home', element: <Home /> },
+        { path: '/contact', element: <Contact/>}
       ],
     },
   ])
