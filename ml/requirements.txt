@@ -1,0 +1,6 @@
+Flask==2.3.2
+Flask_Cors==4.0.0
+numpy==1.26.4
+opencv_python==4.6.0.66
+opencv_python_headless==4.8.0.74
+torch==1.13.0
